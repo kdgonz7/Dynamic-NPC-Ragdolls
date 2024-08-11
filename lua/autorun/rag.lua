@@ -37,7 +37,6 @@ local function DNR_CreateEntityRagdoll(ent)
 		return
 	end
 
-
 	-- so this isn't my addon btw
 	-- however it's a very simple addon, very cool
 	--
