@@ -34,9 +34,6 @@ local function DNR_CreateEntityRagdoll(ent)
 	if ! Enabled:GetBool() then return end       -- enabled is off
 	if ! ent:IsNPC() then return end             -- the entity is not an NPC
 
-	print(ent:GetClass())
-	PrintTable(Blacklist)
-
 	if ! MushAnything:GetBool() and ! Whitelist[ent:GetClass()] then
 		return
 	end
