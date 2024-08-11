@@ -101,15 +101,15 @@ hook.Add("Tick", "RagdollMimicing-Master",function()
 	for ent, ragdoll in pairs(RagdollNPCPairs) do
 		-- ? if there's no entity or ragdoll, remove this entry
 		-- ? sorta a cleanup
-		if ! IsValid(ent) || ! IsValid(ragdoll) then
+		if ! IsValid(ent) then
 			table.remove(RagdollNPCPairs, j)
 			continue
 		end
 
 		-- ! ONLY WANT THIS FOR NPCs
 		-- ! we also wanna ensure that we don't just mush anything
-		if ! ent:IsNPC() then return end
-		if ! MushAnything:GetBool() and ! Whitelist[ent:GetClass()] then return end
+		if ! ent:IsNPC() then continue end
+		if ! MushAnything:GetBool() and ! Whitelist[ent:GetClass()] then continue end
 
 		-- we want the bone count of the ragdoll
 		local r_BoneCount = ragdoll:GetBoneCount()
@@ -134,7 +134,7 @@ hook.Add("Tick", "RagdollMimicing-Master",function()
 				--
 				-- ya sure
 				local p_RagdollPhysicsObject = ragdoll:GetPhysicsObjectNum(b_NPCBoneAsRagdoll)
-				if ! IsValid(p_RagdollPhysicsObject) then return end
+				if ! IsValid(p_RagdollPhysicsObject) then continue end
 
 				-- encapsulate body part information
 				local p_Information = {}
@@ -186,8 +186,9 @@ hook.Add("EntityTakeDamage", "TransferRagdollDamageToNPC", function(target, dmgi
 		if ! IsValid(npc) then return end
 		if ! IsValid(attacker) then return end
 		if attacker == npc then return end
+		if attacker:GetClass() == "prop_ragdoll" then return end
 
-		-- Prevent friendly fire
+		-- prevent friendly fire
 		if FriendlyFireEnabled:GetBool() and attacker:IsNPC() and npc:IsNPC() then
 			local disposition = npc:Disposition(attacker)
 			if disposition == D_LI || disposition == D_FR then
