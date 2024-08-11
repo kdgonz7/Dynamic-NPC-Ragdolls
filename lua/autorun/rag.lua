@@ -2,6 +2,7 @@ if CLIENT then return end
 
 local RagdollNPCPairs = {}
 local Blacklist       = {
+	["npc_headcrab_poison"] = true,
 	["npc_headcrab_black"] = true,
 	["npc_headcrab"] = true,
 	["npc_headcrab_fast"] = true,
@@ -32,6 +33,9 @@ local function DNR_CreateEntityRagdoll(ent)
 	if Blacklist[ent:GetClass()] then return end -- entity is blacklisted
 	if ! Enabled:GetBool() then return end       -- enabled is off
 	if ! ent:IsNPC() then return end             -- the entity is not an NPC
+
+	print(ent:GetClass())
+	PrintTable(Blacklist)
 
 	if ! MushAnything:GetBool() and ! Whitelist[ent:GetClass()] then
 		return
@@ -81,6 +85,7 @@ hook.Add("CreateEntityRagdoll", "RemoveRagdollsByEntities", function (ent, rag)
 	if ! Enabled:GetBool() then return end
 	if ! ent:IsNPC() then return end
 	if ! MushAnything:GetBool() and ! Whitelist[ent:GetClass()] then return end
+	if Blacklist[ent:GetClass()] then return end
 	rag:Remove()
 
 	-- End of CreateEntityRagdoll ( 'RemoveRagdollsByEntities' )
@@ -89,6 +94,8 @@ end)
 hook.Add("OnNPCKilled","RemoveRagdoll",function(npc,attacker,inflictor)
 	if ! Enabled:GetBool() then return end
 	if ! npc:IsNPC() then return end
+	if Blacklist[npc:GetClass()] then return end
+
 
 	local er = RagdollNPCPairs[npc]
 	if ! IsValid(er) then return end
@@ -171,6 +178,7 @@ hook.Add("OnEntityCreated","CreateRagdoll",function(ent)
 	if ent:IsPlayer() then return end                   -- don't create ent rags for players
 	if ent:GetClass() == "prop_ragdoll" then return end -- don't create ent rags for existing rags
 	if ent:GetClass() == "rd_target" then return end    -- don't create ent rags for reagdoll's puppet
+	if Blacklist[ent:GetClass()] then return end
 
 	timer.Simple(0.2, function()
 		if IsValid(ent) then DNR_CreateEntityRagdoll(ent) end
@@ -184,6 +192,8 @@ end)
 hook.Add("EntityTakeDamage", "TransferRagdollDamageToNPC", function(target, dmginfo)
 	if ! Enabled:GetBool() then return end
 	if ! target:IsNPC() then return end
+	if Blacklist[target:GetClass()] then return end
+
 
 	if RagdollNPCPairs[target] then
 		local npc = RagdollNPCPairs[target]
