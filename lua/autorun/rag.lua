@@ -72,6 +72,11 @@ local function DNR_CreateEntityRagdoll(ent)
 	end)
 end
 
+concommand.Add("dnr_addtoraglist", function (ply, args, cmd)
+	if ! args[1] then return end
+	Whitelist[string.Trim(args[1])] = true
+end)
+
 hook.Add("CreateEntityRagdoll", "RemoveRagdollsByEntities", function (ent, rag)
 	if ! Enabled:GetBool() then return end
 	if ! ent:IsNPC() then return end
