@@ -73,6 +73,7 @@ local function DNR_CreateEntityRagdoll(ent)
 end
 
 hook.Add("CreateEntityRagdoll", "RemoveRagdollsByEntities", function (ent, rag)
+	if ! Enabled:GetBool() then return end
 	if ! ent:IsNPC() then return end
 	if ! MushAnything:GetBool() and ! Whitelist[ent:GetClass()] then return end
 	rag:Remove()
@@ -176,6 +177,7 @@ end)
 -- since the ragdoll is the one taking damage, we
 -- transfer it to the NPC
 hook.Add("EntityTakeDamage", "TransferRagdollDamageToNPC", function(target, dmginfo)
+	if ! Enabled:GetBool() then return end
 	if ! target:IsNPC() then return end
 
 	if RagdollNPCPairs[target] then
