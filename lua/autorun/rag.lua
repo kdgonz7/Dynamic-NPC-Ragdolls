@@ -17,19 +17,19 @@ local Whitelist       = {
 }
 
 --[[ Should this system be enabled? defualt = 1 ]]
-local Enabled              = CreateConVar("dnr_enabled", 1, {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+local Enabled              = CreateConVar("dnr_enabled", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 
 --[[ Disables picking up npcs with the physgun. Good for true realism and also fixes certain glitches and crashes that come with this mod ]]
-local DisableTrippyPickup  = CreateConVar("dnr_disablepickup", 1, {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+local DisableTrippyPickup  = CreateConVar("dnr_disablepickup", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 
 --[[ Should anything be turned into a ragdoll? Whatever spawns, as long as it isn't a player will turn into a ragdoll. NOT RECOMMENDED ]]
-local MushAnything         = CreateConVar("dnr_mushanything", 0, {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+local MushAnything         = CreateConVar("dnr_mushanything", "0", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 
 --[[ Should friendly-fire be accounted for in damage? ]]
-local FriendlyFireEnabled  = CreateConVar("dnr_friendlyfire", 0, {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+local FriendlyFireEnabled  = CreateConVar("dnr_friendlyfire", "0", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 
 --[[ Should optimizations be made? ]]
-local EnableOptimization   = CreateConVar("dnr_optimize", 1, {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+local EnableOptimization   = CreateConVar("dnr_optimize", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 
 local function DNR_CanBeSeen(ent)
 	if ! EnableOptimization:GetBool() then return true end
@@ -220,7 +220,6 @@ hook.Add("EntityTakeDamage", "TransferRagdollDamageToNPC", function(target, dmgi
 	if ! target:IsNPC() then return end
 	if Blacklist[target:GetClass()] then return end
 
-
 	if RagdollNPCPairs[target] then
 		local npc = RagdollNPCPairs[target]
 		local attacker = dmginfo:GetAttacker()
@@ -233,6 +232,7 @@ hook.Add("EntityTakeDamage", "TransferRagdollDamageToNPC", function(target, dmgi
 		-- prevent friendly fire
 		if FriendlyFireEnabled:GetBool() and attacker:IsNPC() and npc:IsNPC() then
 			local disposition = npc:Disposition(attacker)
+
 			if disposition == D_LI || disposition == D_FR then
 				return
 			end
