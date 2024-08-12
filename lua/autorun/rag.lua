@@ -28,6 +28,19 @@ local MushAnything         = CreateConVar("dnr_mushanything", 0, {FCVAR_ARCHIVE,
 --[[ Should friendly-fire be accounted for in damage? ]]
 local FriendlyFireEnabled  = CreateConVar("dnr_friendlyfire", 0, {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 
+--[[ Should optimizations be made? ]]
+local EnableOptimization   = CreateConVar("dnr_optimize", 1, {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+
+local function DNR_CanBeSeen(ent)
+	if ! EnableOptimization:GetBool() then return true end
+
+	for _, p in pairs(player.GetHumans()) do
+		if (p:Visible(ent)) then return true end
+	end
+
+	return false
+end
+
 local function DNR_CreateEntityRagdoll(ent)
 	if ! IsValid(ent) then return end            -- no entity
 	if Blacklist[ent:GetClass()] then return end -- entity is blacklisted
@@ -53,7 +66,7 @@ local function DNR_CreateEntityRagdoll(ent)
 		if ! IsValid(ragdoll) then return end
 
 		ent:SetRenderMode(RENDERMODE_NONE)
-		ent:SetCollisionGroup(COLLISION_GROUP_NONE)
+		ent:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
 
 		-- copy everything over
 		ragdoll:SetModel(ent:GetModel())
@@ -62,7 +75,10 @@ local function DNR_CreateEntityRagdoll(ent)
 		ragdoll:SetSkin(ent:GetSkin())
 		ragdoll:Spawn()
 		ragdoll:Activate()
-		ragdoll:SetCollisionGroup(COLLISION_GROUP_DEBRIS_TRIGGER)
+		ragdoll:DrawShadow(false)
+		ragdoll:SetCollisionGroup(COLLISION_GROUP_WORLD)
+
+		ragdoll:GetPhysicsObject():EnableCollisions(false)
 		--! try to put attachments too
 
 		-- add this entity to the ragdoll npc pairs
@@ -115,6 +131,17 @@ hook.Add("Tick", "RagdollMimicing-Master",function()
 		if ! IsValid(ent) then
 			table.remove(RagdollNPCPairs, j)
 			continue
+		end
+
+		if ! DNR_CanBeSeen(ent) then
+			ragdoll:GetPhysicsObject():Sleep()
+			ragdoll:SetRenderMode(RENDERMODE_NONE)
+			ent:SetRenderMode(RENDERMODE_NORMAL)
+			continue
+		else
+			ragdoll:GetPhysicsObject():Wake()
+			ragdoll:SetRenderMode(RENDERMODE_NORMAL)
+			ent:SetRenderMode(RENDERMODE_NONE)
 		end
 
 		-- ! ONLY WANT THIS FOR NPCs
