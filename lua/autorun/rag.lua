@@ -63,6 +63,7 @@ local function DNR_CreateEntityRagdoll(ent)
 		ragdoll:Spawn()
 		ragdoll:Activate()
 		ragdoll:SetCollisionGroup(COLLISION_GROUP_DEBRIS_TRIGGER)
+		--! try to put attachments too
 
 		-- add this entity to the ragdoll npc pairs
 		RagdollNPCPairs[ent] = ragdoll
@@ -141,7 +142,6 @@ hook.Add("Tick", "RagdollMimicing-Master",function()
 			if b_NPCBoneAsRagdoll then
 				-- we can get it's physics object and move it to the specified position
 				-- of the host?
-				--
 				-- ya sure
 				local p_RagdollPhysicsObject = ragdoll:GetPhysicsObjectNum(b_NPCBoneAsRagdoll)
 				if ! IsValid(p_RagdollPhysicsObject) then continue end
