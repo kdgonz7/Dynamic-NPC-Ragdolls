@@ -77,7 +77,6 @@ local function DNR_CreateEntityRagdoll(ent)
 		ragdoll:Activate()
 		ragdoll:DrawShadow(false)
 		ragdoll:SetCollisionGroup(COLLISION_GROUP_WORLD)
-
 		ragdoll:GetPhysicsObject():EnableCollisions(false)
 		--! try to put attachments too
 
@@ -137,6 +136,8 @@ hook.Add("Tick", "RagdollMimicing-Master",function()
 			ragdoll:GetPhysicsObject():Sleep()
 			ragdoll:SetRenderMode(RENDERMODE_NONE)
 			ent:SetRenderMode(RENDERMODE_NORMAL)
+
+			ragdoll:SetPos(ent:GetPos())
 			continue
 		else
 			ragdoll:GetPhysicsObject():Wake()
