@@ -41,13 +41,13 @@ local function DNR_CanBeSeen(ent)
 	return false
 end
 
+---@param ent Entity
 local function DNR_CreateEntityRagdoll(ent)
 	if ! IsValid(ent) then return end            -- no entity
-	if Blacklist[ent:GetClass()] then return end -- entity is blacklisted
 	if ! Enabled:GetBool() then return end       -- enabled is off
 	if ! ent:IsNPC() then return end             -- the entity is not an NPC
 
-	if ! MushAnything:GetBool() and ! Whitelist[ent:GetClass()] then
+	if ! MushAnything:GetBool() and (! Whitelist[ent:GetClass()] or Blacklist[ent:GetClass()]) then
 		return
 	end
 
@@ -98,18 +98,22 @@ end)
 hook.Add("CreateEntityRagdoll", "RemoveRagdollsByEntities", function (ent, rag)
 	if ! Enabled:GetBool() then return end
 	if ! ent:IsNPC() then return end
-	if ! MushAnything:GetBool() and ! Whitelist[ent:GetClass()] then return end
-	if Blacklist[ent:GetClass()] then return end
+	if ! MushAnything:GetBool() and (! Whitelist[ent:GetClass()] or Blacklist[ent:GetClass()]) then
+		return
+	end
+
 	rag:Remove()
 
 	-- End of CreateEntityRagdoll ( 'RemoveRagdollsByEntities' )
 end)
 
+---@param npc Entity
 hook.Add("OnNPCKilled","RemoveRagdoll",function(npc,attacker,inflictor)
 	if ! Enabled:GetBool() then return end
 	if ! npc:IsNPC() then return end
-	if Blacklist[npc:GetClass()] then return end
-
+	if ! MushAnything:GetBool() and (! Whitelist[npc:GetClass()] or Blacklist[npc:GetClass()]) then
+		return
+	end
 
 	local er = RagdollNPCPairs[npc]
 	if ! IsValid(er) then return end
@@ -199,12 +203,15 @@ hook.Add("Tick", "RagdollMimicing-Master",function()
 end)
 
 -- a hook to create the ragdoll when an entity is brought into this world
+---@param ent Entity
 hook.Add("OnEntityCreated","CreateRagdoll",function(ent)
 	if ! ent:IsNPC() then return end                    -- anything else don't do rags for
 	if ent:IsPlayer() then return end                   -- don't create ent rags for players
 	if ent:GetClass() == "prop_ragdoll" then return end -- don't create ent rags for existing rags
 	if ent:GetClass() == "rd_target" then return end    -- don't create ent rags for reagdoll's puppet
-	if Blacklist[ent:GetClass()] then return end
+	if ! MushAnything:GetBool() and (! Whitelist[ent:GetClass()] or Blacklist[ent:GetClass()]) then
+		return
+	end
 
 	timer.Simple(0.2, function()
 		if IsValid(ent) then DNR_CreateEntityRagdoll(ent) end
@@ -218,7 +225,9 @@ end)
 hook.Add("EntityTakeDamage", "TransferRagdollDamageToNPC", function(target, dmginfo)
 	if ! Enabled:GetBool() then return end
 	if ! target:IsNPC() then return end
-	if Blacklist[target:GetClass()] then return end
+	if ! MushAnything:GetBool() and (! Whitelist[target:GetClass()] or Blacklist[target:GetClass()]) then
+		return
+	end
 
 	if RagdollNPCPairs[target] then
 		local npc = RagdollNPCPairs[target]
