@@ -179,6 +179,7 @@ hook.Add("Tick", "RagdollMimicing-Master",function()
 				if ! IsValid(p_RagdollPhysicsObject) then continue end
 
 				-- encapsulate body part information
+				---@class ShadowControlParams
 				local p_Information = {}
 
 				p_Information.secondstoarrive = 0.01 -- as fast as i could get it, sorry
@@ -222,6 +223,8 @@ end)
 
 -- since the ragdoll is the one taking damage, we
 -- transfer it to the NPC
+---@param target Entity
+---@param dmginfo CTakeDamageInfo
 hook.Add("EntityTakeDamage", "TransferRagdollDamageToNPC", function(target, dmginfo)
 	if ! Enabled:GetBool() then return end
 	if ! target:IsNPC() then return end
