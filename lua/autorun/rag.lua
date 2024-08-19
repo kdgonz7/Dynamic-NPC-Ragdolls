@@ -1,4 +1,37 @@
-if CLIENT then return end
+if CLIENT then
+	-- add it to spawnmenu
+
+	hook.Add("AddToolMenuCategories", "AddDNR", function ()
+		spawnmenu.AddToolCategory("Options", "Dynamic NPC Ragdolls", "#Dynamic NPC Ragdoll")
+	end)
+
+	
+	hook.Add("PopulateToolMenu", "AddDNR", function ()
+		--- 
+		--- @param pnl DForm
+		spawnmenu.AddToolMenuOption("Options", "Dynamic NPC Ragdolls", "dnr_options", "#Dynamic NPC Ragdolls", "", "", function ( pnl )
+			pnl:Clear()
+
+			pnl:CheckBox("Enabled", "dnr_enabled")
+			pnl:ControlHelp("Enables or disables the mod.")
+
+			pnl:CheckBox("Disable Pickup with Physics Gun", "dnr_disablepickup")
+			pnl:ControlHelp("Disables the picking up of NPCs with the physics gun.")
+
+			pnl:CheckBox("Turn everything into ragdolls", "dnr_mushanything")
+			pnl:ControlHelp("If disabled, only the entities you add to the ragdoll list will be converted.")
+
+			pnl:CheckBox("Friendly Fire Enabled", "dnr_friendlyfire")
+			pnl:ControlHelp("If disabled, friendly fire will not be prevented.")
+
+			pnl:CheckBox("Do culling + other optimizations", "dnr_optimize")
+			pnl:ControlHelp("Disables server-side ragdolls when the player is not looking at them. Recommended to be used in wide, broad, and high-density areas!")
+			
+			pnl:NumSlider("Ragdoll Mimic Speed", "dnr_hspeed", 0.01, 10, 3)
+			pnl:ControlHelp("How fast the ragdoll mimics the host's movement. Faster = MORE REALISTIC")
+		end)
+	end)
+end
 
 local RagdollNPCPairs = {}
 local Blacklist       = {
@@ -30,6 +63,9 @@ local FriendlyFireEnabled  = CreateConVar("dnr_friendlyfire", "0", {FCVAR_ARCHIV
 
 --[[ Should optimizations be made? ]]
 local EnableOptimization   = CreateConVar("dnr_optimize", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+
+--[[ How fast should the ragdoll be moving to the position of the host? ]]
+local HostSpeed             = CreateConVar("dnr_hspeed", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 
 local function DNR_CanBeSeen(ent)
 	if ! EnableOptimization:GetBool() then return true end
@@ -182,14 +218,14 @@ hook.Add("Tick", "RagdollMimicing-Master",function()
 				---@class ShadowControlParams
 				local p_Information = {}
 
-				p_Information.secondstoarrive = 0.01 -- as fast as i could get it, sorry
-				p_Information.pos = c_BonePosition   -- the bone pos
-				p_Information.angle = c_BoneAngle    -- the bone rotation
-				p_Information.maxangular = 650       -- some random ass damping values
-				p_Information.maxangulardamp = 500   -- angular daming too
-				p_Information.maxspeed = 405         -- max speed
-				p_Information.maxspeeddamp = 405     -- max speed: electric boogaloo
-				p_Information.teleportdistance = 0   -- idk what this does
+				p_Information.secondstoarrive = HostSpeed:GetInt() -- as fast as i could get it, sorry
+				p_Information.pos = c_BonePosition                 -- the bone pos
+				p_Information.angle = c_BoneAngle                  -- the bone rotation
+				p_Information.maxangular = 650                     -- some random ass damping values
+				p_Information.maxangulardamp = 500                 -- angular daming too
+				p_Information.maxspeed = 405                       -- max speed
+				p_Information.maxspeeddamp = 405                   -- max speed: electric boogaloo
+				p_Information.teleportdistance = 0                 -- idk what this does
 
 				p_RagdollPhysicsObject:Wake()                                 -- wake it
 				p_RagdollPhysicsObject:ComputeShadowControl(p_Information)    -- begin the matrix simulation
