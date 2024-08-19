@@ -100,7 +100,7 @@ local function DNR_CreateEntityRagdoll(ent)
 	--
 	-- ima patch it for personal reasons however i love what the creator has set up
 
-	if false then
+	if true then
 		if CLIENT then return end
 
 		timer.Simple(0, function()
