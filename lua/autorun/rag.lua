@@ -217,8 +217,9 @@ hook.Add("Tick", "RagdollMimicing-Master",function()
 				-- encapsulate body part information
 				---@class ShadowControlParams
 				local p_Information = {}
-
-				p_Information.secondstoarrive = HostSpeed:GetInt() -- as fast as i could get it, sorry
+				local p_HSpeed = HostSpeed:GetFloat()
+				
+				p_Information.secondstoarrive = p_HSpeed           -- as fast as i could get it, sorry
 				p_Information.pos = c_BonePosition                 -- the bone pos
 				p_Information.angle = c_BoneAngle                  -- the bone rotation
 				p_Information.maxangular = 650                     -- some random ass damping values
