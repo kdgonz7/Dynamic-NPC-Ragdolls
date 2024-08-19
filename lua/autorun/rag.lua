@@ -67,6 +67,9 @@ local EnableOptimization   = CreateConVar("dnr_optimize", "1", {FCVAR_ARCHIVE, F
 --[[ How fast should the ragdoll be moving to the position of the host? ]]
 local HostSpeed             = CreateConVar("dnr_hspeed", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 
+--[[ ( experimental ) option to do all ragdoll calculations client-side instead, using client side ragdolls ]]
+local EnableCSRagdolls     = CreateConVar("dnr_csragdolls", "0", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+
 local function DNR_CanBeSeen(ent)
 	if ! EnableOptimization:GetBool() then return true end
 
@@ -77,11 +80,12 @@ local function DNR_CanBeSeen(ent)
 	return false
 end
 
+
 ---@param ent Entity
 local function DNR_CreateEntityRagdoll(ent)
-	if ! IsValid(ent) then return end            -- no entity
-	if ! Enabled:GetBool() then return end       -- enabled is off
-	if ! ent:IsNPC() then return end             -- the entity is not an NPC
+	if ! IsValid(ent) then return end -- no entity
+	if ! Enabled:GetBool() then return end -- enabled is off
+	if ! ent:IsNPC() then return end -- the entity is not an NPC
 
 	if ! MushAnything:GetBool() and (! Whitelist[ent:GetClass()] or Blacklist[ent:GetClass()]) then
 		return
@@ -96,34 +100,56 @@ local function DNR_CreateEntityRagdoll(ent)
 	--
 	-- ima patch it for personal reasons however i love what the creator has set up
 
-	timer.Simple(0, function()
-		local ragdoll = ents.Create("prop_ragdoll")
+	if false then
+		if CLIENT then return end
 
-		if ! IsValid(ragdoll) then return end
+		timer.Simple(0, function()
+			local ragdoll = ents.Create("prop_ragdoll")
 
-		ent:SetRenderMode(RENDERMODE_NONE)
-		ent:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
+			if ! IsValid(ragdoll) then return end
 
-		-- copy everything over
-		ragdoll:SetModel(ent:GetModel())
-		ragdoll:SetPos(ent:GetPos())
-		ragdoll:SetAngles(ent:GetAngles())
-		ragdoll:SetSkin(ent:GetSkin())
-		ragdoll:Spawn()
-		ragdoll:Activate()
-		ragdoll:DrawShadow(false)
-		ragdoll:SetCollisionGroup(COLLISION_GROUP_WORLD)
-		ragdoll:GetPhysicsObject():EnableCollisions(false)
-		--! try to put attachments too
+			ent:SetRenderMode(RENDERMODE_NONE)
+			ent:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
 
-		-- add this entity to the ragdoll npc pairs
-		RagdollNPCPairs[ent] = ragdoll
+			-- copy everything over
+			ragdoll:SetModel(ent:GetModel())
+			ragdoll:SetPos(ent:GetPos())
+			ragdoll:SetAngles(ent:GetAngles())
+			ragdoll:SetSkin(ent:GetSkin())
+			ragdoll:Spawn()
+			ragdoll:Activate()
+			ragdoll:DrawShadow(false)
+			ragdoll:SetCollisionGroup(COLLISION_GROUP_WORLD)
+			ragdoll:GetPhysicsObject():EnableCollisions(false)
+			--! try to put attachments too
 
-		-- this probably means there is a mismatch, therefore this entity is not a humanoid-esque figure
-		-- or a figure that works ig (???)
-		-- (this was in the original, i didn't write this)
-		if ragdoll:GetBoneCount() ~= ent:GetBoneCount() then ragdoll:Remove() end
-	end)
+			-- add this entity to the ragdoll npc pairs
+			RagdollNPCPairs[ent] = ragdoll
+
+			-- this probably means there is a mismatch, therefore this entity is not a humanoid-esque figure
+			-- or a figure that works ig (???)
+			-- (this was in the original, i didn't write this)
+			if ragdoll:GetBoneCount() ~= ent:GetBoneCount() then ragdoll:Remove() end
+		end)
+	else
+		if SERVER then return end
+
+		local __ragdoll = ClientsideRagdoll(ent:GetModel())
+		if ! IsValid(__ragdoll) then return end
+
+		__ragdoll:SetModel(ent:GetModel())
+		__ragdoll:SetPos(ent:GetPos())
+		__ragdoll:SetAngles(ent:GetAngles())
+		__ragdoll:SetSkin(ent:GetSkin())
+		__ragdoll:Spawn()
+		__ragdoll:Activate()
+		__ragdoll:DrawShadow(false)
+		__ragdoll:SetCollisionGroup(COLLISION_GROUP_WORLD)
+		__ragdoll:GetPhysicsObject():EnableCollisions(false)
+		__ragdoll:SetNoDraw( false )
+
+		RagdollNPCPairs[ent] = __ragdoll
+	end
 end
 
 concommand.Add("dnr_addtoraglist", function (ply, args, cmd)
